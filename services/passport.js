@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 function initializePassport(passport) {
   const authenticateUser = (email, password, done) => {
     pool.query(
-      `SELECT * FROM users WHERE email = $1`,
+      `SELECT * FROM autenticaciones WHERE email = $1`,
       [email],
       (err, results) => {
         if (err) {
@@ -18,12 +18,12 @@ function initializePassport(passport) {
 
         if (results.rows.length > 0) {
           const user = results.rows[0];
-
+          console.log(password, user.password);
           bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
               throw err;
             }
-
+            console.log(isMatch);
             if (isMatch) {
               return done(null, user);
             } else {
@@ -51,15 +51,19 @@ function initializePassport(passport) {
     )
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => done(null, user.id_autenticacion));
 
   passport.deserializeUser((id, done) => {
-    pool.query(`SELECT * FROM users WHERE id = $1`, [id], (err, results) => {
-      if (err) {
-        throw err;
+    pool.query(
+      `SELECT * FROM autenticaciones WHERE id_autenticacion = $1`,
+      [id],
+      (err, results) => {
+        if (err) {
+          throw err;
+        }
+        return done(null, results.rows[0]);
       }
-      return done(null, results.rows[0]);
-    });
+    );
   });
 }
 
@@ -68,6 +72,5 @@ initializePassport(passport);
 module.exports = (app) => {
   app.use(passport.initialize());
   app.use(passport.session());
-
   app.use(flash());
 };

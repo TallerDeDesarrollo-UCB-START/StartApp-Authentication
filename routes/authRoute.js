@@ -31,7 +31,7 @@ module.exports = (app) => {
   });
 
   app.get("/users/dashboard", checkNotAuthenticated, (req, res) => {
-    res.render("dashboard", { user: req.user.name });
+    res.render("dashboard", { user: req.user.nombre_completo });
   });
 
   app.get("/users/logout", (req, res) => {
@@ -67,7 +67,7 @@ module.exports = (app) => {
       console.log(hashedPassword);
 
       pool.query(
-        `SELECT * FROM users 
+        `SELECT * FROM autenticaciones 
                   WHERE email = $1`,
         [email],
         (err, results) => {
@@ -81,9 +81,9 @@ module.exports = (app) => {
             res.render("register", { errors });
           } else {
             pool.query(
-              `INSERT INTO users (name, email, password)
+              `INSERT INTO autenticaciones (nombre_completo, email, password)
                               VALUES ($1, $2, $3)
-                              RETURNING id, password`,
+                              RETURNING id_autenticacion, password`,
               [name, email, hashedPassword],
               (err, results) => {
                 if (err) {
