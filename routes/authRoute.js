@@ -1,6 +1,7 @@
 const passport = require("passport");
 const { pool } = require("../config/dbConfig");
 const bcrypt = require("bcrypt");
+const SETTINGS = require("../config/Settings");
 
 function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
@@ -48,7 +49,7 @@ module.exports = (app) => {
       errors.push({ message: "Ingresa todos los campos." });
     }
 
-    if (password.length < 6) {
+    if (password.length < SETTINGS.minPasswordLength) {
       errors.push({
         message: "La contaseña no debe tener menos de 6 caracteres.",
       });
